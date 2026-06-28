@@ -1,0 +1,25 @@
+Starting Microsoft MPI Setup Process (Final) 
+28/06/2026 
+23:18
+Checking for Administrator privileges... 
+Checking for installation files... 
+Installing MS-MPI Runtime... 
+Runtime installation command executed. 
+Installing MS-MPI SDK... 
+SDK installation command executed. 
+Configuring Windows Firewall... 
+Ok.
+
+Ok.
+
+Ok.
+
+Configuring MPI Service... 
+[SC] ChangeServiceConfig SUCCESS
+[SC] StartService FAILED 1056:
+
+An instance of the service is already running.
+
+Verifying MPI execution... 
+MPI successfully verified on this machine. 
+Setup process completed. 
