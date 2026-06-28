@@ -1,43 +1,52 @@
 @echo off
-:: Universal Microsoft MPI Installer & Guide
+setlocal
+:: Ultimate Microsoft MPI & C++ Cluster Manager
 :: Use %~dp0 to make the path dynamic and portable for any Windows device
 set LOG_DIR=%~dp0
 if "%LOG_DIR:~-1%"=="\" set LOG_DIR=%LOG_DIR:~0,-1%
 set LOG_FILE=%LOG_DIR%\mpi_setup_log_final.txt
 set DOWNLOAD_URL=https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi
 
-:MAIN_MENU
-cls
-echo ======================================================
-echo   Universal Microsoft MPI Installer ^& Project Guide
-echo ======================================================
-echo Please select an option:
-echo.
-echo 1. Install and Verify MPI on this Machine
-echo 2. Run a Local MPI Application
-echo 3. How to Connect Multiple Devices (Cluster Guide)
-echo 4. CSC580 Group Project Guide (atifnewcastle/mpi-project)
-echo 5. Exit
-echo.
-set /p MENU_CHOICE="Enter your choice (1-5): "
-
-if "%MENU_CHOICE%"=="1" goto INSTALL_MPI
-if "%MENU_CHOICE%"=="2" goto RUN_APP
-if "%MENU_CHOICE%"=="3" goto CLUSTER_GUIDE
-if "%MENU_CHOICE%"=="4" goto CSC580_GUIDE
-if "%MENU_CHOICE%"=="5" goto END
-
-goto MAIN_MENU
-
-:INSTALL_MPI
-cls
-echo Checking for Administrator privileges... > "%LOG_FILE%"
+:: Check for Administrator privileges at startup so it covers all options
 net session >nul 2>&1
 if %errorlevel% neq 0 (
     echo Requesting administrative privileges...
     powershell -Command "Start-Process cmd -ArgumentList '/c \"%~f0\"' -Verb RunAs"
     exit /b
 )
+
+:MAIN_MENU
+cls
+echo ======================================================
+echo   Ultimate Microsoft MPI ^& C++ Cluster Manager
+echo ======================================================
+echo Please select an option:
+echo.
+echo 1. Install and Verify MPI on this Machine
+echo 2. Install C++ Tools ^& Compile Project
+echo 3. Auto-Configure Cluster Network ^& Accounts
+echo 4. Run the MPI Application
+echo 5. View Project Guides
+echo 6. Exit
+echo.
+set /p MENU_CHOICE="Enter your choice (1-6): "
+
+if "%MENU_CHOICE%"=="1" goto INSTALL_MPI
+if "%MENU_CHOICE%"=="2" goto COMPILE_CPP
+if "%MENU_CHOICE%"=="3" goto CLUSTER_SETUP
+if "%MENU_CHOICE%"=="4" goto RUN_APP
+if "%MENU_CHOICE%"=="5" goto PROJECT_GUIDES
+if "%MENU_CHOICE%"=="6" goto END
+
+goto MAIN_MENU
+
+
+:: ==========================================
+:: OPTION 1: INSTALL MPI
+:: ==========================================
+:INSTALL_MPI
+cls
+echo Checking for Administrator privileges... > "%LOG_FILE%"
 
 :CHECK_FILES
 echo Checking for installation files... >> "%LOG_FILE%"
@@ -58,73 +67,175 @@ goto CHECK_FILES
 
 :DO_INSTALL
 echo Installing MS-MPI Runtime...
-echo Installing MS-MPI Runtime... >> "%LOG_FILE%"
 "%LOG_DIR%\msmpisetup.exe" -unattend >> "%LOG_FILE%" 2>&1
-echo Runtime installation command executed. >> "%LOG_FILE%"
 
 echo Installing MS-MPI SDK...
-echo Installing MS-MPI SDK... >> "%LOG_FILE%"
 msiexec /i "%LOG_DIR%\msmpisdk.msi" /quiet /qn /norestart >> "%LOG_FILE%" 2>&1
-echo SDK installation command executed. >> "%LOG_FILE%"
 
 echo Configuring Windows Firewall...
-echo Configuring Windows Firewall... >> "%LOG_FILE%"
 netsh advfirewall firewall add rule name="Microsoft MPI TCP Ports" dir=in action=allow protocol=TCP localport=49152-65535 >> "%LOG_FILE%" 2>&1
 netsh advfirewall firewall add rule name="Microsoft MPI UDP Ports" dir=in action=allow protocol=UDP localport=49152-65535 >> "%LOG_FILE%" 2>&1
 netsh advfirewall firewall add rule name="Microsoft MPI Launch Service" dir=in action=allow program="%ProgramFiles%\Microsoft MPI\Bin\smpd.exe" enable=yes >> "%LOG_FILE%" 2>&1
 
 echo Configuring MPI Service...
-echo Configuring MPI Service... >> "%LOG_FILE%"
 sc config MsMpiLaunchSvc start= delayed-auto >> "%LOG_FILE%" 2>&1
 sc start MsMpiLaunchSvc >> "%LOG_FILE%" 2>&1
 
-echo Verifying MPI execution... >> "%LOG_FILE%"
 echo.
 echo ==========================================
 echo Verifying MPI Installation...
-echo Running test command: mpiexec -n 4 hostname
 "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n 4 hostname
 if %errorlevel% equ 0 (
     echo.
     echo MPI successfully verified on this machine!
-    echo MPI successfully verified on this machine. >> "%LOG_FILE%"
 ) else (
     echo.
     echo WARNING: mpiexec test failed. Check the log file.
-    echo WARNING: mpiexec command failed or is not recognized. >> "%LOG_FILE%"
 )
 echo ==========================================
-echo.
-echo Setup process completed. >> "%LOG_FILE%"
-echo Done. Please check the log file at "%LOG_FILE%".
 echo.
 pause
 goto MAIN_MENU
 
 
+:: ==========================================
+:: OPTION 2: INSTALL C++ TOOLS & COMPILE
+:: ==========================================
+:COMPILE_CPP
+cls
+echo ==========================================
+echo   Compiling MPI C++ Project
+echo ==========================================
+echo.
+
+:: Generate starter C++ code if it doesn't exist
+if not exist "%LOG_DIR%\mpi_analytics.cpp" (
+    echo Generating starter C++ code ^(mpi_analytics.cpp^)...
+    (
+        echo #include ^<mpi.h^>
+        echo #include ^<iostream^>
+        echo int main^(int argc, char** argv^) {
+        echo     MPI_Init^(&argc, &argv^);
+        echo     int world_size, world_rank;
+        echo     MPI_Comm_size^(MPI_COMM_WORLD, &world_size^);
+        echo     MPI_Comm_rank^(MPI_COMM_WORLD, &world_rank^);
+        echo     char processor_name[MPI_MAX_PROCESSOR_NAME];
+        echo     int name_len;
+        echo     MPI_Get_processor_name^(processor_name, &name_len^);
+        echo     std::cout ^<^< "Hello from processor " ^<^< processor_name ^<^< ", rank " ^<^< world_rank ^<^< " out of " ^<^< world_size ^<^< " processors" ^<^< std::endl;
+        echo     MPI_Finalize^();
+        echo     return 0;
+        echo }
+    ) > "%LOG_DIR%\mpi_analytics.cpp"
+)
+
+:: Check if 'cl' is already available
+where cl >nul 2>&1
+if %errorlevel% equ 0 goto DO_COMPILE
+
+:: Find Visual Studio environment
+set VCVARS=
+for %%v in (Enterprise Professional Community BuildTools) do (
+    if exist "C:\Program Files\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat" (
+        set VCVARS="C:\Program Files\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat"
+        goto SETUP_ENV
+    )
+)
+
+:: Install Build Tools if missing
+echo Microsoft C++ Compiler (cl.exe) is not installed.
+echo Downloading Visual Studio 2022 Build Tools setup...
+powershell -Command "Invoke-WebRequest -Uri 'https://aka.ms/vs/17/release/vs_buildtools.exe' -OutFile 'vs_buildtools.exe'"
+
+echo.
+echo Installing C++ Build Tools (Downloads ~2GB, takes 5-15 mins)...
+start /wait vs_buildtools.exe --quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended
+
+set VCVARS="C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+
+:SETUP_ENV
+echo Setting up C++ Developer Environment automatically...
+call %VCVARS% >nul 2>&1
+
+:DO_COMPILE
+echo.
+echo Compiling mpi_analytics.cpp...
+cd /d "%LOG_DIR%"
+cl /EHsc /O2 mpi_analytics.cpp /I "%MSMPI_INC%" /link "%MSMPI_LIB64%\msmpi.lib" /out:mpi_analytics.exe
+echo.
+if exist mpi_analytics.exe (
+    echo SUCCESS: mpi_analytics.exe has been compiled!
+) else (
+    echo ERROR: Compilation failed.
+)
+pause
+goto MAIN_MENU
+
+
+:: ==========================================
+:: OPTION 3: CLUSTER SETUP
+:: ==========================================
+:CLUSTER_SETUP
+cls
+echo ======================================================
+echo   Automated Cluster Setup Tool
+echo ======================================================
+
+set CLUSTER_USER=mpi_cluster
+set CLUSTER_PASS=mpi123
+set SHARED_DIR=C:\MPI_Project
+set SHARE_NAME=MPI_Project
+
+echo [1/4] Creating background local user account (%CLUSTER_USER%)...
+net user %CLUSTER_USER% %CLUSTER_PASS% /add >nul 2>&1
+
+echo [2/4] Granting Administrator privileges...
+net localgroup Administrators %CLUSTER_USER% /add >nul 2>&1
+
+echo [3/4] Creating dedicated project folder at %SHARED_DIR%...
+if not exist "%SHARED_DIR%" mkdir "%SHARED_DIR%"
+
+echo [4/4] Configuring Network Sharing and File Permissions...
+net share %SHARE_NAME% /delete >nul 2>&1
+net share %SHARE_NAME%="%SHARED_DIR%" /grant:%CLUSTER_USER%,FULL >nul 2>&1
+icacls "%SHARED_DIR%" /grant %CLUSTER_USER%:(OI)(CI)F /T >nul 2>&1
+
+echo.
+echo CLUSTER SETUP COMPLETE!
+echo Copy your compiled mpi_analytics.exe into %SHARED_DIR%.
+echo.
+echo Execute using:
+echo mpiexec -user %CLUSTER_USER% -password %CLUSTER_PASS% -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\YourLaptopName\%SHARE_NAME%\mpi_analytics.exe
+echo.
+pause
+goto MAIN_MENU
+
+
+:: ==========================================
+:: OPTION 4: RUN APP
+:: ==========================================
 :RUN_APP
 cls
 echo ==========================================
 echo   Run Local MPI Application
 echo ==========================================
-:: Auto-detect executable in the same folder
 set APP_PATH=
 for %%f in ("%LOG_DIR%\*.exe") do (
-    if /i not "%%~nxf"=="msmpisetup.exe" (
+    if /i not "%%~nxf"=="msmpisetup.exe" if /i not "%%~nxf"=="vs_buildtools.exe" (
         set "APP_PATH=%%~f"
         goto FOUND_APP
     )
 )
 
-echo No other executable found in the current folder.
-set /p APP_PATH="Enter the full path to the MPI executable: "
+echo No executable found in the current folder.
+set /p APP_PATH="Enter the full path to the MPI executable (without quotes): "
 goto PROMPT_PROCS
 
 :FOUND_APP
 echo Auto-detected executable: "%APP_PATH%"
 set /p CONFIRM_APP="Use this executable? (Y/N, or press Enter for Yes): "
 if /i "%CONFIRM_APP%"=="N" (
-    set /p APP_PATH="Enter the full path to the MPI executable: "
+    set /p APP_PATH="Enter the full path to the MPI executable (without quotes): "
 )
 
 :PROMPT_PROCS
@@ -137,49 +248,27 @@ pause
 goto MAIN_MENU
 
 
-:CLUSTER_GUIDE
-cls
-echo ======================================================
-echo   How to Connect Multiple Devices (Cluster Guide)
-echo ======================================================
-echo To run your MPI application across multiple computers, ensure the following:
-echo.
-echo 1. INSTALL MPI: Run this installer script (Option 1) on EVERY computer.
-echo 2. SAME ACCOUNT: You MUST use a Windows account with the EXACT same 
-echo    Username and Password on all computers.
-echo 3. SHARED FOLDER: The MPI .exe must be in a network shared folder that 
-echo    all computers can access via the same path (e.g., \\MainPC\Shared\app.exe).
-echo.
-echo Example Command to run on the Main PC:
-echo mpiexec -hosts 2 LaptopA LaptopB -n 4 \\LaptopA\Shared\app.exe
-echo.
-pause
-goto MAIN_MENU
-
-
-:CSC580_GUIDE
+:: ==========================================
+:: OPTION 5: PROJECT GUIDES
+:: ==========================================
+:PROJECT_GUIDES
 cls
 echo ======================================================
 echo   CSC580 Group Project Guide
 echo ======================================================
-echo 1. ENSURE LAN CONNECTION: All 4 group members' laptops must be on the 
-echo    same Wi-Fi or Ethernet switch.
-echo 2. INSTALL MPI: Ensure Option 1 (Install MPI) is run on all 4 laptops.
-echo 3. HOSTFILE: On the Master node, create 'hostfile.txt' with the 4 IP addresses:
+echo 1. ENSURE LAN CONNECTION: All laptops must be on the same Wi-Fi/Ethernet.
+echo 2. HOSTFILE: On the Master node, create 'hostfile.txt' with 4 IPs:
 echo      192.168.x.x1
-echo      192.168.x.x2
-echo      192.168.x.x3
-echo      192.168.x.x4
+echo      192.168.x.x2...
 echo.
-echo 4. COMPILE: Use this command on all nodes to build your C++ code:
-echo    cl /EHsc /O2 mpi_analytics.cpp /I "%%MSMPI_INC%%" /link "%%MSMPI_LIB64%%\msmpi.lib" /out:mpi_analytics.exe
-echo.
-echo 5. EXECUTE: The Node Master runs the distributed job:
-echo    mpiexec -n 4 -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 mpi_analytics.exe 10000000
+echo 3. EXECUTE: The Node Master runs the distributed job:
+echo    mpiexec -user mpi_cluster -password mpi123 -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\Laptop1\MPI_Project\mpi_analytics.exe 10000000
 echo.
 pause
 goto MAIN_MENU
 
-
+:: ==========================================
+:: OPTION 6: EXIT
+:: ==========================================
 :END
 exit /b
