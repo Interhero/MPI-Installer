@@ -228,32 +228,104 @@ goto MAIN_MENU
 :RUN_APP
 cls
 echo ==========================================
+echo   Run MPI Application
+echo ==========================================
+echo.
+echo Please select run mode:
+echo [L] Run locally on this machine
+echo [C] Run on a cluster of multiple computers
+echo.
+set /p RUN_MODE="Enter run mode (L/C): "
+
+if /i "%RUN_MODE%"=="L" goto RUN_LOCAL
+if /i "%RUN_MODE%"=="C" goto RUN_CLUSTER
+goto RUN_APP
+
+:RUN_LOCAL
+cls
+echo ==========================================
 echo   Run Local MPI Application
 echo ==========================================
 set APP_PATH=
 for %%f in ("%LOG_DIR%\*.exe") do (
     if /i not "%%~nxf"=="msmpisetup.exe" if /i not "%%~nxf"=="vs_buildtools.exe" (
         set "APP_PATH=%%~f"
-        goto FOUND_APP
+        goto FOUND_LOCAL_APP
     )
 )
 
 echo No executable found in the current folder.
 set /p APP_PATH="Enter the full path to the MPI executable (without quotes): "
-goto PROMPT_PROCS
+goto PROMPT_LOCAL_PROCS
 
-:FOUND_APP
+:FOUND_LOCAL_APP
 echo Auto-detected executable: "%APP_PATH%"
 set /p CONFIRM_APP="Use this executable? (Y/N, or press Enter for Yes): "
 if /i "%CONFIRM_APP%"=="N" (
     set /p APP_PATH="Enter the full path to the MPI executable (without quotes): "
 )
 
-:PROMPT_PROCS
+:PROMPT_LOCAL_PROCS
 set /p NUM_PROCS="Enter the number of processes (e.g., 4): "
 echo.
 echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%"
 "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%"
+echo.
+pause
+goto MAIN_MENU
+
+
+:RUN_CLUSTER
+cls
+echo ==========================================
+echo   Run MPI Cluster Application
+echo ==========================================
+:: Auto-detect from C:\MPI_Project
+set APP_PATH=
+set SHARED_DIR=C:\MPI_Project
+set SHARE_NAME=MPI_Project
+for %%f in ("%SHARED_DIR%\*.exe") do (
+    set "APP_PATH=\\%COMPUTERNAME%\%SHARE_NAME%\%%~nxf"
+    goto FOUND_CLUSTER_APP
+)
+
+echo No executable found in the shared folder (%SHARED_DIR%).
+echo Please compile your code first and copy the .exe to the shared folder.
+set /p APP_PATH="Enter the UNC path to the shared executable (e.g., \\%COMPUTERNAME%\%SHARE_NAME%\mpi_analytics.exe): "
+goto PROMPT_CLUSTER_INFO
+
+:FOUND_CLUSTER_APP
+echo Auto-detected shared executable: "%APP_PATH%"
+set /p CONFIRM_APP="Use this executable? (Y/N, or press Enter for Yes): "
+if /i "%CONFIRM_APP%"=="N" (
+    set /p APP_PATH="Enter the UNC path to the shared executable: "
+)
+
+:PROMPT_CLUSTER_INFO
+set /p NUM_HOSTS="Enter the number of computers in the cluster (2-4): "
+if "%NUM_HOSTS%"=="2" (
+    set /p IP1="Enter IP for Computer 1 (Master/Self): "
+    set /p IP2="Enter IP for Computer 2 (Worker): "
+    set HOSTS_ARG=2 %IP1% 1 %IP2% 1
+)
+if "%NUM_HOSTS%"=="3" (
+    set /p IP1="Enter IP for Computer 1 (Master/Self): "
+    set /p IP2="Enter IP for Computer 2 (Worker): "
+    set /p IP3="Enter IP for Computer 3 (Worker): "
+    set HOSTS_ARG=3 %IP1% 1 %IP2% 1 %IP3% 1
+)
+if "%NUM_HOSTS%"=="4" (
+    set /p IP1="Enter IP for Computer 1 (Master/Self): "
+    set /p IP2="Enter IP for Computer 2 (Worker): "
+    set /p IP3="Enter IP for Computer 3 (Worker): "
+    set /p IP4="Enter IP for Computer 4 (Worker): "
+    set HOSTS_ARG=4 %IP1% 1 %IP2% 1 %IP3% 1 %IP4% 1
+)
+
+set /p NUM_PROCS="Enter the total number of processes to run across the cluster (e.g., 4): "
+echo.
+echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -user mpi_cluster -password mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -user mpi_cluster -password mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
 echo.
 pause
 goto MAIN_MENU
