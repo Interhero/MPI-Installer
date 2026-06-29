@@ -166,6 +166,10 @@ call %VCVARS% >nul 2>&1
 
 :DO_COMPILE
 echo.
+:: Fallback for MS-MPI SDK variables if not yet propagated to the current terminal session
+if "%MSMPI_INC%"=="" set "MSMPI_INC=C:\Program Files (x86)\Microsoft SDKs\MPI\Include"
+if "%MSMPI_LIB64%"=="" set "MSMPI_LIB64=C:\Program Files (x86)\Microsoft SDKs\MPI\Lib\x64"
+
 echo Compiling mpi_analytics.cpp...
 cd /d "%LOG_DIR%"
 cl /EHsc /O2 mpi_analytics.cpp /I "%MSMPI_INC%" /link "%MSMPI_LIB64%\msmpi.lib" /out:mpi_analytics.exe
