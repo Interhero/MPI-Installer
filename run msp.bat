@@ -135,10 +135,12 @@ if %errorlevel% equ 0 goto DO_COMPILE
 
 :: Find Visual Studio environment
 set VCVARS=
-for %%v in (Enterprise Professional Community BuildTools) do (
-    if exist "C:\Program Files\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat" (
-        set VCVARS="C:\Program Files\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat"
-        goto SETUP_ENV
+for %%d in ("C:\Program Files" "C:\Program Files (x86)") do (
+    for %%v in (Enterprise Professional Community BuildTools) do (
+        if exist "%%~d\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat" (
+            set VCVARS="%%~d\Microsoft Visual Studio\2022\%%v\VC\Auxiliary\Build\vcvars64.bat"
+            goto SETUP_ENV
+        )
     )
 )
 
@@ -151,7 +153,12 @@ echo.
 echo Installing C++ Build Tools (Downloads ~2GB, takes 5-15 mins)...
 start /wait vs_buildtools.exe --quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended
 
-set VCVARS="C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+set VCVARS=
+for %%d in ("C:\Program Files" "C:\Program Files (x86)") do (
+    if exist "%%~d\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" (
+        set VCVARS="%%~d\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+    )
+)
 
 :SETUP_ENV
 echo Setting up C++ Developer Environment automatically...
