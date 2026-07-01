@@ -15,12 +15,7 @@ Once open, use the main menu options in order:
 * Installs and starts the `smpd` service (configured as Local System with desktop interaction).
 * Runs a local test (`mpiexec -n 4 hostname`) to verify installation.
 
-### 2️⃣ Option 2: Install C++ Tools & Compile
-* Automatically creates a starter C++ code file (`mpi_analytics.cpp`) if it doesn't exist.
-* Detects or installs the MSVC C++ compiler in the background.
-* Compiles your C++ code into a ready-to-run `mpi_analytics.exe` file.
-
-### 3️⃣ Option 3: Auto-Configure Cluster Network & Accounts
+### 2️⃣ Option 2: Auto-Configure Cluster Network & Accounts
 * Run this on **both** the Master and Worker computers.
 * Automatically overrides Windows registry security blocks (LocalAccountTokenFilterPolicy, ForceGuest, RestrictRemoteClients).
 * Sets Tailscale VPN connection profile to **Private** to prevent firewall drops.
@@ -28,6 +23,11 @@ Once open, use the main menu options in order:
 * Creates a background local user account:
   * **Username:** `mpi_cluster`
   * **Password:** `mpi123`
+
+### 3️⃣ Option 3: Install C++ Tools & Compile
+* Automatically creates a starter C++ code file (`mpi_analytics.cpp`) if it doesn't exist.
+* Detects or installs the MSVC C++ compiler in the background.
+* Compiles your C++ code into a ready-to-run `mpi_analytics.exe` file.
 
 ---
 

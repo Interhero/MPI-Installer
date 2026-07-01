@@ -29,8 +29,8 @@ echo ======================================================
 echo Please select an option:
 echo.
 echo 1. Install and Verify MPI on this Machine
-echo 2. Install C++ Tools ^& Compile Project
-echo 3. Auto-Configure Cluster Network ^& Accounts
+echo 2. Auto-Configure Cluster Network ^& Accounts
+echo 3. Install C++ Tools ^& Compile Project
 echo 4. Run the MPI Application
 echo 5. View Project Guides
 echo 6. Exit
@@ -38,8 +38,8 @@ echo.
 set /p MENU_CHOICE="Enter your choice (1-6): "
 
 if "%MENU_CHOICE%"=="1" goto INSTALL_MPI
-if "%MENU_CHOICE%"=="2" goto COMPILE_CPP
-if "%MENU_CHOICE%"=="3" goto CLUSTER_SETUP
+if "%MENU_CHOICE%"=="2" goto CLUSTER_SETUP
+if "%MENU_CHOICE%"=="3" goto COMPILE_CPP
 if "%MENU_CHOICE%"=="4" goto RUN_APP
 if "%MENU_CHOICE%"=="5" goto PROJECT_GUIDES
 if "%MENU_CHOICE%"=="6" goto END
