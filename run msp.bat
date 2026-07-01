@@ -232,7 +232,7 @@ echo CLUSTER SETUP COMPLETE!
 echo Copy your compiled mpi_analytics.exe into %SHARED_DIR%.
 echo.
 echo Execute using:
-echo mpiexec -user %CLUSTER_USER% -password %CLUSTER_PASS% -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\YourLaptopName\%SHARE_NAME%\mpi_analytics.exe
+echo mpiexec -pwd %CLUSTER_PASS% -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\YourLaptopName\%SHARE_NAME%\mpi_analytics.exe
 echo.
 pause
 goto MAIN_MENU
@@ -340,8 +340,8 @@ if "%NUM_HOSTS%"=="4" (
 
 set /p NUM_PROCS="Enter the total number of processes to run across the cluster (e.g., 4): "
 echo.
-echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -user mpi_cluster -password mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
-"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -user mpi_cluster -password mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
 echo.
 pause
 goto MAIN_MENU
@@ -361,7 +361,7 @@ echo      192.168.x.x1
 echo      192.168.x.x2...
 echo.
 echo 3. EXECUTE: The Node Master runs the distributed job:
-echo    mpiexec -user mpi_cluster -password mpi123 -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\Laptop1\MPI_Project\mpi_analytics.exe 10000000
+echo    mpiexec -pwd mpi123 -hosts 4 [IP1] 1 [IP2] 1 [IP3] 1 [IP4] 1 \\Laptop1\MPI_Project\mpi_analytics.exe 10000000
 echo.
 pause
 goto MAIN_MENU
