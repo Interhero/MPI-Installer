@@ -7,6 +7,12 @@ if "%LOG_DIR:~-1%"=="\" set LOG_DIR=%LOG_DIR:~0,-1%
 set LOG_FILE=%LOG_DIR%\mpi_setup_log_final.txt
 set DOWNLOAD_URL=https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi
 
+:: Global Configuration Variables
+set CLUSTER_USER=mpi_cluster
+set CLUSTER_PASS=mpi123
+set SHARED_DIR=C:\MPI_Project
+set SHARE_NAME=MPI_Project
+
 :: Check for Administrator privileges at startup so it covers all options
 net session >nul 2>&1
 if %errorlevel% neq 0 (
@@ -196,11 +202,6 @@ echo ======================================================
 echo   Automated Cluster Setup Tool
 echo ======================================================
 
-set CLUSTER_USER=mpi_cluster
-set CLUSTER_PASS=mpi123
-set SHARED_DIR=C:\MPI_Project
-set SHARE_NAME=MPI_Project
-
 echo [1/6] Creating background local user account (%CLUSTER_USER%)...
 net user %CLUSTER_USER% %CLUSTER_PASS% /add >nul 2>&1
 
@@ -302,8 +303,6 @@ echo   Run MPI Cluster Application
 echo ==========================================
 :: Auto-detect from C:\MPI_Project
 set APP_PATH=
-set SHARED_DIR=C:\MPI_Project
-set SHARE_NAME=MPI_Project
 for %%f in ("%SHARED_DIR%\*.exe") do (
     set "APP_PATH=\\%COMPUTERNAME%\%SHARE_NAME%\%%~nxf"
     goto FOUND_CLUSTER_APP
@@ -344,8 +343,8 @@ if "%NUM_HOSTS%"=="4" (
 
 set /p NUM_PROCS="Enter the total number of processes to run across the cluster (e.g., 4): "
 echo.
-echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
-"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd mpi123 -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
 echo.
 pause
 goto MAIN_MENU
