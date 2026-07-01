@@ -197,19 +197,35 @@ set CLUSTER_PASS=mpi123
 set SHARED_DIR=C:\MPI_Project
 set SHARE_NAME=MPI_Project
 
-echo [1/4] Creating background local user account (%CLUSTER_USER%)...
+echo [1/6] Creating background local user account (%CLUSTER_USER%)...
 net user %CLUSTER_USER% %CLUSTER_PASS% /add >nul 2>&1
 
-echo [2/4] Granting Administrator privileges...
+echo [2/6] Granting Administrator privileges...
 net localgroup Administrators %CLUSTER_USER% /add >nul 2>&1
 
-echo [3/4] Creating dedicated project folder at %SHARED_DIR%...
+echo [3/6] Creating dedicated project folder at %SHARED_DIR%...
 if not exist "%SHARED_DIR%" mkdir "%SHARED_DIR%"
 
-echo [4/4] Configuring Network Sharing and File Permissions...
+echo [4/6] Configuring Network Sharing and File Permissions...
 net share %SHARE_NAME% /delete >nul 2>&1
 net share %SHARE_NAME%="%SHARED_DIR%" /grant:%CLUSTER_USER%,FULL >nul 2>&1
 icacls "%SHARED_DIR%" /grant %CLUSTER_USER%:(OI)(CI)F /T >nul 2>&1
+
+echo [5/6] Applying Registry overrides for remote execution and RPC...
+:: Enable LocalAccountTokenFilterPolicy to allow remote local admin actions
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f >nul 2>&1
+:: Disable ForceGuest to enforce classic authentication
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v ForceGuest /t REG_DWORD /d 0 /f >nul 2>&1
+:: Disable Blank Password Restrictions (allows connectivity if matching passwords are blank)
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v LimitBlankPasswordUse /t REG_DWORD /d 0 /f >nul 2>&1
+:: Relax RPC remote client restriction (fixes RPC blocking issues)
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Rpc" /v RestrictRemoteClients /t REG_DWORD /d 0 /f >nul 2>&1
+:: Grant Authenticated Users (AU) permission to start/stop/read the MPI service
+sc sdset MsMpiLaunchSvc D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)(A;;CCLCSWRPWPDTLOCRRC;;;AU) >nul 2>&1
+
+echo [6/6] Configuring Tailscale interface network profile...
+:: Auto-detect and configure Tailscale network profile to Private to prevent firewall drops
+powershell -Command "if (Get-NetConnectionProfile -InterfaceAlias 'Tailscale' -ErrorAction SilentlyContinue) { Set-NetConnectionProfile -InterfaceAlias 'Tailscale' -NetworkCategory Private -ErrorAction SilentlyContinue; Write-Output ' - Tailscale set to Private.' } else { Write-Output ' - Tailscale interface not found, skipping.' }"
 
 echo.
 echo CLUSTER SETUP COMPLETE!
