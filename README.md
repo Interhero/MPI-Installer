@@ -1,22 +1,51 @@
-# Universal Microsoft MPI Installer
+# 📡 Universal Microsoft MPI & C++ Cluster Manager
 
-A portable and fully automated batch script to easily install, configure, and verify Microsoft MPI (Message Passing Interface) on any Windows machine.
+This repository contains a single, unified setup script (**`run msp.bat`**) that fully automates compiling, installing, and configuring Microsoft MPI (Message Passing Interface) for parallel execution on Windows.
 
-## Features
-- **True Portability**: Uses dynamic paths (`%~dp0`) so it can be run directly from a USB drive, network share, or local folder without needing a specific directory structure.
-- **Automated Setup**: Installs both the MS-MPI Runtime and SDK silently with no user interaction required.
-- **Firewall & Services Configuration**: Automatically opens the necessary TCP and UDP ports (`49152-65535`) in the Windows Firewall and configures the `MsMpiLaunchSvc` background service.
-- **Auto-Verification**: Explicitly tests the installation by spinning up 4 parallel MPI processes on your machine and displaying the output.
-- **App Auto-Detection**: Simply place your compiled MPI `.exe` application in the same folder as the installer. Once setup is complete, it will automatically detect your program and allow you to instantly run it across multiple processes.
+## 🚀 Setup Instructions (Just Run the `.bat` File)
 
-## Usage
-1. Clone or download this repository.
-2. Ensure that `msmpisetup.exe` and `msmpisdk.msi` are in the same folder as `run msp.bat`. (If missing, the script will direct you to download them).
-3. **Double-click `run msp.bat`**. 
-   *(The script automatically requests Administrator privileges if you aren't running it as an admin yet).*
-4. Let the setup run. 
-5. When complete, press Enter to exit, or type 'R' to run a custom MPI application.
+To configure your machine, simply **double-click `run msp.bat`**. 
+*(The script will automatically request Administrator privileges to apply firewall and network changes).*
 
-## Requirements
-- Windows OS (64-bit recommended)
-- Administrator Privileges (Auto-requested by the script)
+Once open, use the main menu options in order:
+
+### 1️⃣ Option 1: Install & Verify MPI
+* Installs the MS-MPI Runtime and SDK in the background.
+* Configures Windows Firewall rules.
+* Installs and starts the `smpd` service (configured as Local System with desktop interaction).
+* Runs a local test (`mpiexec -n 4 hostname`) to verify installation.
+
+### 2️⃣ Option 2: Install C++ Tools & Compile
+* Automatically creates a starter C++ code file (`mpi_analytics.cpp`) if it doesn't exist.
+* Detects or installs the MSVC C++ compiler in the background.
+* Compiles your C++ code into a ready-to-run `mpi_analytics.exe` file.
+
+### 3️⃣ Option 3: Auto-Configure Cluster Network & Accounts
+* Run this on **both** the Master and Worker computers.
+* Automatically overrides Windows registry security blocks (LocalAccountTokenFilterPolicy, ForceGuest, RestrictRemoteClients).
+* Sets Tailscale VPN connection profile to **Private** to prevent firewall drops.
+* Configures the shared folder `C:\MPI_Project` for network application sharing.
+* Creates a background local user account:
+  * **Username:** `mpi_cluster`
+  * **Password:** `mpi123`
+
+---
+
+## 👥 Testing Cluster Connection (Master & Worker)
+
+Once Option 3 has been run on all machines, do the following to establish a connection:
+
+1. **Switch Account to Local:** On both the Master and Worker laptops, sign out of Windows and log into the newly created **`mpi_cluster`** local account (Password: `mpi123`).
+2. **Verify Connectivity (On Master):** Open a Command Prompt and run the test command using your Tailscale/LAN IP addresses:
+   ```cmd
+   mpiexec -pwd mpi123 -hosts 2 [Master_IP] 1 [Worker_IP] 1 hostname
+   ```
+   *If successful, it will print both computer hostnames on your screen!*
+
+---
+
+## 🏃 Running Your MPI Application
+To execute your compiled C++ project across your cluster:
+1. Copy your compiled `.exe` to the shared `C:\MPI_Project` folder on the Master node.
+2. Select **Option 4** (Run the MPI Application) in `run msp.bat`.
+3. Choose **`C`** (Cluster Mode) and follow the simple prompts to input the IP addresses.
