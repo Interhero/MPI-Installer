@@ -78,7 +78,11 @@ netsh advfirewall firewall add rule name="Microsoft MPI UDP Ports" dir=in action
 netsh advfirewall firewall add rule name="Microsoft MPI Launch Service" dir=in action=allow program="%ProgramFiles%\Microsoft MPI\Bin\smpd.exe" enable=yes >> "%LOG_FILE%" 2>&1
 
 echo Configuring MPI Service...
-sc config MsMpiLaunchSvc start= delayed-auto >> "%LOG_FILE%" 2>&1
+:: Install the service manually just in case it wasn't registered by the installer (from msp_configure.md Step 5.1)
+"%ProgramFiles%\Microsoft MPI\Bin\smpd.exe" -install >> "%LOG_FILE%" 2>&1
+:: Configure service to run under Local System account with desktop interaction (from msp_configure.md Step 5.3)
+sc config MsMpiLaunchSvc obj= "LocalSystem" type= interact type= own start= delayed-auto >> "%LOG_FILE%" 2>&1
+:: Start the service (from msp_configure.md Step 5.2)
 sc start MsMpiLaunchSvc >> "%LOG_FILE%" 2>&1
 
 echo.
