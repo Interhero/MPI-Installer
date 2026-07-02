@@ -288,9 +288,13 @@ if /i "%CONFIRM_APP%"=="N" (
 
 :PROMPT_LOCAL_PROCS
 set /p NUM_PROCS="Enter the number of processes (e.g., 4): "
+set /p DATASET_PATH="Enter the full path to the dataset file (e.g., C:\MPI_Project\dataset\dataset_medium.bin): "
+:: Strip surrounding quotes from paths to prevent syntax errors
+set "APP_PATH=%APP_PATH:"=%"
+set "DATASET_PATH=%DATASET_PATH:"=%"
 echo.
-echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%"
-"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%"
+echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%" "%DATASET_PATH%"
+"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -n %NUM_PROCS% "%APP_PATH%" "%DATASET_PATH%"
 echo.
 pause
 goto MAIN_MENU
@@ -342,9 +346,13 @@ if "%NUM_HOSTS%"=="4" (
 )
 
 set /p NUM_PROCS="Enter the total number of processes to run across the cluster (e.g., 4): "
+set /p DATASET_PATH="Enter the network path to the dataset file (e.g., \\100.118.222.67\MPI_Project\dataset\dataset_medium.bin): "
+:: Strip surrounding quotes from paths to prevent syntax errors
+set "APP_PATH=%APP_PATH:"=%"
+set "DATASET_PATH=%DATASET_PATH:"=%"
 echo.
-echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
-"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%"
+echo Running: "%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%" "%DATASET_PATH%"
+"%ProgramFiles%\Microsoft MPI\Bin\mpiexec.exe" -pwd %CLUSTER_PASS% -hosts %HOSTS_ARG% -n %NUM_PROCS% "%APP_PATH%" "%DATASET_PATH%"
 echo.
 pause
 goto MAIN_MENU
