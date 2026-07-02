@@ -33,10 +33,10 @@ Once open, use the main menu options in order:
 
 ## 👥 Testing Cluster Connection (Master & Worker)
 
-Once Option 3 has been run on all machines, do the following to establish a connection:
+Once Option 2 has been run on all machines, do the following to establish a connection:
 
-1. **Switch Account to Local:** On both the Master and Worker laptops, sign out of Windows and log into the newly created **`mpi_cluster`** local account (Password: `mpi123`).
-2. **Verify Connectivity (On Master):** Open a Command Prompt and run the test command using your Tailscale/LAN IP addresses:
+1. **Switch Account on Master:** On the **Master** laptop only, sign out of Windows and log into the newly created **`mpi_cluster`** local account (Password: `mpi123`). *(Worker laptops do NOT need to switch accounts or log in; they can remain on their personal accounts).*
+2. **Verify Connectivity (On Master):** Open a Command Prompt under the `mpi_cluster` account and run the test command using your Tailscale/LAN IP addresses:
    ```cmd
    mpiexec -pwd mpi123 -hosts 2 [Master_IP] 1 [Worker_IP] 1 hostname
    ```
