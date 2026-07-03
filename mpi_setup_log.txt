@@ -1,0 +1,24 @@
+Starting Microsoft MPI Setup Process 
+18/06/2026 
+15:03
+Checking for Administrator privileges... 
+Installing MS-MPI Runtime... 
+ERROR: msmpisetup.exe not found in C:\Users\Interhero\Downloads\Microsoft-MPI 
+Installing MS-MPI SDK... 
+ERROR: msmpisdk.msi not found in C:\Users\Interhero\Downloads\Microsoft-MPI 
+Configuring Windows Firewall... 
+Ok.
+
+Ok.
+
+Ok.
+
+Installing and starting SMPD service... 
+Unknown option: -install
+The service name is invalid.
+
+More help is available by typing NET HELPMSG 2185.
+
+Verifying MPI execution... 
+MPI successfully verified on this machine. 
+Setup process completed. 

@@ -1,0 +1,24 @@
+Checking for Administrator privileges... 
+Checking for installation files... 
+Ok.
+
+Ok.
+
+Ok.
+
+Unknown option: -install
+[SC] ChangeServiceConfig SUCCESS
+
+WARNING:  The service MsMpiLaunchSvc is configured as interactive whose support is being deprecated. The service may not function properly.
+
+
+SERVICE_NAME: MsMpiLaunchSvc 
+        TYPE               : 110  WIN32_OWN_PROCESS  (interactive)
+        STATE              : 2  START_PENDING 
+                                (NOT_STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x7d0
+        PID                : 15592
+        FLAGS              : 
